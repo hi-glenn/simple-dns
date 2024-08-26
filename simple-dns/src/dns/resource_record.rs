@@ -165,6 +165,20 @@ impl<'a> WireFormat<'a> for ResourceRecord<'a> {
         out.seek(std::io::SeekFrom::End(0))?;
         Ok(())
     }
+
+    fn write_compressed_only_name_to<T: std::io::Write + std::io::Seek>(
+        &'a self,
+        out: &mut T,
+        name_refs: &mut HashMap<&'a [Label<'a>], usize>,
+    ) -> crate::Result<()> {
+        self.name.write_compressed_to(out, name_refs)?;
+        self.write_common(out)?;
+
+        out.write_all(&(self.rdata.len() as u16).to_be_bytes())?;
+        self.rdata.write_to(out);
+
+        Ok(())
+    }
 }
 
 impl<'a> Hash for ResourceRecord<'a> {

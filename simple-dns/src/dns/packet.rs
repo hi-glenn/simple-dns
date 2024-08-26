@@ -210,7 +210,7 @@ impl<'a> Packet<'a> {
             e.write_compressed_to(out, &mut name_refs)?;
         }
         for e in &self.answers {
-            e.write_compressed_to(out, &mut name_refs)?;
+            e.write_compressed_only_name_to(out, &mut name_refs)?;
         }
         for e in &self.name_servers {
             e.write_compressed_to(out, &mut name_refs)?;

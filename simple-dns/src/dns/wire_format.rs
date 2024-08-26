@@ -25,6 +25,14 @@ pub(crate) trait WireFormat<'a> {
         self.write_to(out)
     }
 
+    fn write_compressed_only_name_to<T: Write + Seek>(
+        &'a self,
+        out: &mut T,
+        _name_refs: &mut HashMap<&'a [Label<'a>], usize>,
+    ) -> crate::Result<()> {
+        self.write_to(out)
+    }
+
     /// Returns the length in bytes of this content
     fn len(&self) -> usize;
 }
