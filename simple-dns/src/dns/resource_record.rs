@@ -168,6 +168,20 @@ impl<'a> WireFormat<'a> for ResourceRecord<'a> {
         out.seek(SeekFrom::Start(end))?;
         Ok(())
     }
+
+    fn write_compressed_only_name_to<T: Write + Seek>(
+        &'a self,
+        out: &mut T,
+        name_refs: &mut crate::lib::BTreeMap<&[crate::Label<'a>], u16>,
+    ) -> crate::Result<()> {
+        self.name.write_compressed_to(out, name_refs)?;
+        self.write_common(out)?;
+
+        out.write_all(&(self.rdata.len() as u16).to_be_bytes())?;
+        self.rdata.write_to(out)?;
+
+        Ok(())
+    }
 }
 
 impl Hash for ResourceRecord<'_> {

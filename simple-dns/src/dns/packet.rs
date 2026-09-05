@@ -224,6 +224,34 @@ impl<'a> Packet<'a> {
         Ok(())
     }
 
+    /// Write the contents of this package in wire format with enabled compression,
+    /// but only compress the name of the answers section (rdata is written uncompressed)
+    pub fn write_compressed_name_only_to<T: Write + Seek>(&self, out: &mut T) -> crate::Result<()> {
+        self.write_header(out)?;
+
+        let mut name_refs = Default::default();
+        for e in &self.questions {
+            e.write_compressed_to(out, &mut name_refs)?;
+        }
+        for e in &self.answers {
+            e.write_compressed_only_name_to(out, &mut name_refs)?;
+        }
+        for e in &self.name_servers {
+            e.write_compressed_to(out, &mut name_refs)?;
+        }
+
+        if let Some(rr) = self.header.opt_rr() {
+            rr.write_to(out)?;
+        }
+
+        for e in &self.additional_records {
+            e.write_compressed_to(out, &mut name_refs)?;
+        }
+        out.flush()?;
+
+        Ok(())
+    }
+
     fn write_header<T: Write>(&self, out: &mut T) -> crate::Result<()> {
         self.header.write_to(
             out,
