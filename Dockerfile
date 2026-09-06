@@ -10,14 +10,6 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     pkg-config \
     libssl-dev \
-    liburcu-dev \
-    libcap-dev \
-    libuv1-dev \
-    clang \
-    libclang-dev \
-    autoconf \
-    automake \
-    libtool \
     git \
     && rm -rf /var/lib/apt/lists/*
 
@@ -30,9 +22,6 @@ WORKDIR /build
 
 COPY . .
 
-RUN cd bind9 && autoreconf -fi && ./configure --disable-doh && make &&  make install && ldconfig
-
 ENV RUSTFLAGS="-C linker-features=-lld"
-RUN cd bind9-tests && cargo build 
-# Run the tests for the bind9-tests crate
-CMD ["cargo", "test", "-p", "bind9-tests"]
+RUN cargo build
+CMD ["cargo", "test"]
